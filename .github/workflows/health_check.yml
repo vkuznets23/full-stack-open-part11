@@ -1,0 +1,26 @@
+name: Health Check
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  health_check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check server health
+        uses: r0adkll/url-health-check@v1.0.0
+        with:
+          url: ${{ secrets.DEPLOYED_URL }}
+          retries: 3
+          retry-delay: 10
+
+      - name: Notify failure
+        if: failure()
+        uses: rjstone/discord-webhook-notify@v2
+        with:
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          severity: error
+          details: "❌ Health check failed for `${{ secrets.DEPLOYED_URL }}`"
