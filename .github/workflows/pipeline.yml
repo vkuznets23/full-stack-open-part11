@@ -31,22 +31,22 @@ jobs:
 
       - name: Discord Notification Success
         if: ${{ success() }}
-        uses: Ilshidur/action-discord@v0.3.2
+        uses: rjstone/discord-webhook-notify@v2
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          message: "✅ Build & tests succeeded for commit `${{ github.sha }}`"
-          username: "GitHub Actions"
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          severity: info
+          details: "✅ Build & tests succeeded for commit `${{ github.sha }}`"
 
       - name: Discord Notification Failure
         if: ${{ failure() }}
-        uses: Ilshidur/action-discord@v0.3.2
+        uses: rjstone/discord-webhook-notify@v2
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          message: |
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          severity: error
+          details: |
             ❌ Build or tests failed for commit `${{ github.sha }}`
             Repository: `${{ github.repository }}`
             Workflow: `${{ github.workflow }}`
-          username: "GitHub Actions"
 
   deploy_to_render:
     needs: simple_deployment_pipeline
@@ -77,18 +77,18 @@ jobs:
           DRY_RUN: false
       - name: Discord Notification Success
         if: ${{ success() }}
-        uses: Ilshidur/action-discord@v0.3.2
+        uses: rjstone/discord-webhook-notify@v2
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          message: "✅ Deployment and tagging succeeded for commit `${{ github.sha }}`"
-          username: "GitHub Actions"
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          severity: info
+          details: "✅ Deployment and tagging succeeded for commit `${{ github.sha }}`"
       - name: Discord Notification Failure
         if: ${{ failure() }}
-        uses: Ilshidur/action-discord@v0.3.2
+        uses: rjstone/discord-webhook-notify@v2
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          message: |
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          severity: error
+          details: |
             ❌ Deployment or tagging failed for commit `${{ github.sha }}`
             Repository: `${{ github.repository }}`
             Workflow: `${{ github.workflow }}`
-          username: "GitHub Actions"
