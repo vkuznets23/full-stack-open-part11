@@ -1,8 +1,5 @@
 name: Deployment pipeline
 
-env:
-  SKIP_DEPLOY: ${{ contains(join(github.event.commits.*.message, ' '), '#skip') }}
-
 on:
   push:
     branches:
@@ -35,7 +32,7 @@ jobs:
   deploy_to_render:
     needs: simple_deployment_pipeline
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && env.SKIP_DEPLOY != 'true' }}
+    if: ${{ github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
     steps:
       - name: Trigger deployment
         uses: sws2apps/render-deployment@main
@@ -47,7 +44,7 @@ jobs:
   tag_release:
     needs: deploy_to_render
     runs-on: ubuntu-latest
-    if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' && env.SKIP_DEPLOY != 'true' }}
+    if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
