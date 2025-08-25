@@ -29,25 +29,6 @@ jobs:
       - name: Run e2e tests
         run: npm run test:e2e
 
-      - name: Discord Notification Success
-        if: ${{ success() }}
-        uses: rjstone/discord-webhook-notify@v2
-        with:
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          severity: info
-          details: "✅ Build & tests succeeded for commit `${{ github.sha }}`"
-
-      - name: Discord Notification Failure
-        if: ${{ failure() }}
-        uses: rjstone/discord-webhook-notify@v2
-        with:
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          severity: error
-          details: |
-            ❌ Build or tests failed for commit `${{ github.sha }}`
-            Repository: `${{ github.repository }}`
-            Workflow: `${{ github.workflow }}`
-
   deploy_to_render:
     needs: simple_deployment_pipeline
     runs-on: ubuntu-latest
@@ -75,20 +56,20 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BUMP: patch
           DRY_RUN: false
-      - name: Discord Notification Success
-        if: ${{ success() }}
+
+  notify_discord:
+    needs: [simple_deployment_pipeline, deploy_to_render, tag_release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord notification
         uses: rjstone/discord-webhook-notify@v2
         with:
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          severity: info
-          details: "✅ Deployment and tagging succeeded for commit `${{ github.sha }}`"
-      - name: Discord Notification Failure
-        if: ${{ failure() }}
-        uses: rjstone/discord-webhook-notify@v2
-        with:
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          severity: error
+          severity: ${{ job.status == 'success' && 'info' || 'error' }}
           details: |
-            ❌ Deployment or tagging failed for commit `${{ github.sha }}`
-            Repository: `${{ github.repository }}`
-            Workflow: `${{ github.workflow }}`
+            Repository: ${{ github.repository }}
+            Workflow: ${{ github.workflow }}
+            Event: ${{ github.event_name }}
+            Actor: ${{ github.actor }}
+            Commit: ${{ github.sha }}
+            Status: ${{ job.status == 'success' && '✅ All jobs succeeded' || '❌ Some jobs failed' }}
