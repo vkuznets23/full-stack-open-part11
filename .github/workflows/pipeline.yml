@@ -29,6 +29,25 @@ jobs:
       - name: Run e2e tests
         run: npm run test:e2e
 
+      - name: Discord Notification Success
+        if: ${{ success() }}
+        uses: rjstone/discord-webhook-notify@v2
+        with:
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          severity: info
+          details: "✅ Build & tests succeeded for commit `${{ github.sha }}`"
+
+      - name: Discord Notification Failure
+        if: ${{ failure() }}
+        uses: rjstone/discord-webhook-notify@v2
+        with:
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          severity: error
+          details: |
+            ❌ Build or tests failed for commit `${{ github.sha }}`
+            Repository: `${{ github.repository }}`
+            Workflow: `${{ github.workflow }}`
+
   deploy_to_render:
     needs: simple_deployment_pipeline
     runs-on: ubuntu-latest
@@ -51,8 +70,25 @@ jobs:
         with:
           fetch-depth: 0
       - name: Bump version and push tag
-        uses: anothrNick/github-tag-action@1.64.0
+        uses: anothrNick/github-tag-action@8c8163ef62cf9c4677c8e800f36270af27930f42
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BUMP: patch
           DRY_RUN: false
+      - name: Discord Notification Success
+        if: ${{ success() }}
+        uses: rjstone/discord-webhook-notify@v2
+        with:
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          severity: info
+          details: "✅ Deployment and tagging succeeded for commit `${{ github.sha }}`"
+      - name: Discord Notification Failure
+        if: ${{ failure() }}
+        uses: rjstone/discord-webhook-notify@v2
+        with:
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          severity: error
+          details: |
+            ❌ Deployment or tagging failed for commit `${{ github.sha }}`
+            Repository: `${{ github.repository }}`
+            Workflow: `${{ github.workflow }}`
