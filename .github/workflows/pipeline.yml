@@ -36,6 +36,7 @@ jobs:
   deploy_to_render:
     needs: simple_deployment_pipeline
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' }}
     steps:
       - name: Trigger deployment
         uses: sws2apps/render-deployment@main
