@@ -10,52 +10,6 @@ on:
 
 jobs:
   simple_deployment_pipeline:
-    # setup the environment
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-      # steps
-      - name: Install dependencies
-        run: npm install
-
-      - name: Check style
-        run: npm run eslint
-
-      - name: Build
-        run: npm run build
-
-      - name: Run tests
-        run: npm run test
-
-      - name: Run e2e tests
-        run: npm run test:e2e
-
-  deploy_to_render:
-    needs: simple_deployment_pipeline
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' }}
-    steps:
-      - name: Trigger deployment
-        uses: sws2apps/render-deployment@main
-        with:
-          serviceId: ${{ secrets.RENDER_SERVICE_ID }}
-          apiKey: ${{ secrets.RENDER_API_KEY }}
-          multipleDeployment: false
-  name: Deployment pipeline
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches: [main]
-    types: [opened, synchronize]
-
-jobs:
-  simple_deployment_pipeline:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -102,4 +56,3 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BUMP: patch
           DRY_RUN: false
-
